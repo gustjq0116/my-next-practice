@@ -4,7 +4,7 @@ import { PersonInfo } from '../../../api/VehiclePerson'
 import { compare } from 'bcrypt'
 import { sign } from 'jsonwebtoken'
 import { secret } from '../../../api/secret'
-
+import cookie from 'cookie'
 
 export default async function getPersonById(req: NextApiRequest, res: NextApiResponse)
 {
@@ -24,7 +24,18 @@ export default async function getPersonById(req: NextApiRequest, res: NextApiRes
         const claims = { sub: person.id, PersonEmail: person.email }
         const jwt = sign(claims, secret, { expiresIn: '1h' })
         
-        if(match) { return res.json({ authToken: jwt }) }
+        if(match) 
+        {
+            res.setHeader('Set-Cookie', cookie.serialize('auth', jwt, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV !== 'development',
+                sameSite: 'strict',
+                maxAge: 3600,
+                path: '/'
+            }))
+
+            return res.json({ message: 'Login Success' }) 
+        }
         else { return res.json({ message: 'Password is wrong'}) }
     
     }

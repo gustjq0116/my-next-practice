@@ -6,13 +6,11 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { VehicleInfo } from '../../api/VehiclePerson'
-import { GetServerSideProps } from 'next'
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
+import { checkLoginAuth } from '../../api/CheckLoginAuth'
 
-export interface VehicleInfo2
-{
-    list: VehicleInfo[]
-}
-export default function vehicle({ list }: VehicleInfo2)
+
+export default function vehicle({ list }: InferGetServerSidePropsType<typeof getServerSideProps>)
 {
     return (
     <TableContainer component={Paper}>
@@ -26,7 +24,8 @@ export default function vehicle({ list }: VehicleInfo2)
             </TableRow>
         </TableHead>
         <TableBody>
-            {list.map((row: VehicleInfo, index) => (
+            {/* {console.log(list)} */}
+            {list.map((row: VehicleInfo, index: number) => (
             <TableRow key={index}>
                 <TableCell component="th" scope="row">
                 {row.id}
@@ -44,10 +43,11 @@ export default function vehicle({ list }: VehicleInfo2)
 
 export const getServerSideProps: GetServerSideProps = async (context) =>
 {
-    const resp = await fetch('http://localhost:3000/api/vehicle')
-    const json: VehicleInfo[] = await resp.json()
-    return { props: 
-            { 
-                list: json
-            }}
+    //console.log(context.req.complete)
+    const json: VehicleInfo[] = await checkLoginAuth('http://localhost:3000/api/vehicle', context)
+    
+    return { props:
+    {
+        list: json!
+    }}
 }

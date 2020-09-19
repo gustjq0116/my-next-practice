@@ -10,3 +10,4 @@ export default auth(async function getAllVehicles(req: NextApiRequest, res: Next
 
     res.json(vehicles)
 })
+
